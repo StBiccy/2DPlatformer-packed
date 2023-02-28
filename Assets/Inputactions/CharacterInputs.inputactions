@@ -1,5 +1,5 @@
 {
-    "name": "Character Inputs",
+    "name": "CharacterInputs",
     "maps": [
         {
             "name": "Player",
@@ -26,7 +26,7 @@
             ],
             "bindings": [
                 {
-                    "name": "Direction",
+                    "name": "A/D",
                     "id": "00ca640b-d935-4593-8157-c05846ea39b3",
                     "path": "1DAxis",
                     "interactions": "",
