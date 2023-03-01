@@ -1,19 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class CharacterController : MonoBehaviour
 {
+    #region variables 
     private CharacterInputs input; // Input class reference
 
     private Rigidbody2D rb; // Player's rigidbody refrence
 
+    #region Ground variables
+
     [Header("Ground Check Values")]
-    [SerializeField] private CapsuleCollider2D coll; // Player's collison refrence
+    [SerializeField] private BoxCollider2D coll; // Player's collison refrence
     [SerializeField] private LayerMask groundLayers; // Ground layers refrence
     [SerializeField] private bool groundCheckGizmo; // Check if we want to see gizmo for ground checks
+    private float lastOnGround = 0.0f;
     private Color groundGizmo = Color.red; //Colour value of the ground check gizmo
+    #endregion
+
+    #region Movement variables
 
     [Header("Movement values")]
     [SerializeField, Range(0.0f, 20.0f)] float runAccel; // Acceleration rate of the player
@@ -23,50 +31,60 @@ public class CharacterController : MonoBehaviour
     private float runDeccelAmount; // Represents the current decceleration amount
 
     private float direction; // The directoin the player is moving in
+    #endregion
+
+    #region Jump variables
 
     [Header("Jump values")]
     [SerializeField, Range(0.0f, 20.0f)] private float jumpHight; //The hight of the player's jump
     [SerializeField, Range(0.0f, 20.0f)] private float jumpTimeToApex; //Time between applying jump and reaching the apex, also used it gravityStrength, jumpForce
+    [SerializeField, Range(0.01f, 0.75f)] private float coyoteTime; // represents how long th eplayer can be off a platform and still jump
+    [SerializeField, Range(0.01f, 0.75f)] private float jumpTimeBuffer; // represents a buffer on when the player jumps to allow them extra time to actually be allowed to
+    private float lastPressedJump = 0.0f; // represents the last time jump button was pressed
     private float jumpForce; // The force applied to the player (upwards) when they jump
     private float gravityStrength; // The downward fource (gravity) use in jumpForce, gravityScale
     private float gravityScale; // represents the gravity scale this is to be set to
-    private bool jumping = false;// check if the player is jumping <----
+    private bool isJumping = false;// check if the player is jumping
+    private bool canJumpCut = false; // check if the player can jump cut
+    private bool jumpCut;// check if the player has chosen to jump cut
+    #endregion
 
+    #endregion
+
+    #region Setups
+
+    //runst first thing on scritp
     private void Awake()
     {
         input = new CharacterInputs();
         rb = GetComponent<Rigidbody2D>();
-        coll = GetComponent<CapsuleCollider2D>();
+        coll = GetComponent<BoxCollider2D>();
     }
 
-    private void Start()
+    // Updates when inspector changes
+    private void OnValidate()
     {
+        rb = GetComponent<Rigidbody2D>();
+
         gravityStrength = -(2 * jumpHight) / (jumpTimeToApex * jumpTimeToApex);
         gravityScale = gravityStrength / Physics2D.gravity.y;
 
         jumpForce = Mathf.Abs(gravityStrength) * jumpTimeToApex;
 
         runAccelAmount = (50 * runAccel) / maxRunSpeed;
-        runDeccelAmount = (50* runDeccel) / maxRunSpeed;
+        runDeccelAmount = (50 * runDeccel) / maxRunSpeed;
 
 
         SetGravityScale(gravityScale);
     }
 
+    // Sets the gravity scale of rigidbody
     private void SetGravityScale (float scale)
     {
         rb.gravityScale = scale;
     }
 
-    private void OnValidate()
-    {
-        gravityStrength = -(2 * jumpHight) / (jumpTimeToApex * jumpTimeToApex);
-
-
-
-        jumpForce = Mathf.Abs(gravityStrength) * jumpTimeToApex;
-    }
-
+    //Updates when object is enabled
     private void OnEnable()
     {
         input.Enable();
@@ -76,44 +94,76 @@ public class CharacterController : MonoBehaviour
         input.Player.Move.canceled += OnMovementCanceled;
     }
 
+    // Updates when object is disabled
     private void OnDisable()
     {
-        input.Enable();
+        input.Disable();
         input.Player.Move.performed -= OnMovement;
         input.Player.Move.canceled -= OnMovementCanceled;
     }
 
+    #endregion
+
+    #region Updates
+
+    // Updates at a fixed rate, use mainly for physics updating
     private void FixedUpdate()
     {
         Movement();
+    }
 
-        if (jumping && IsGrounded())
+    // Updates every frame, use mainly for frame specfic actions
+    private void Update()
+    {
+        lastOnGround -= Time.deltaTime;
+        lastPressedJump -= Time.deltaTime;
+
+        //Check if player can jump
+        if (lastPressedJump > 0 && lastOnGround > 0)
         {
+
+
+            isJumping = true;
+            canJumpCut = true;
+            jumpCut = false;
+
             Jump();
         }
+        else if (jumpCut)
+        {
+            isJumping = false;
+
+            SetGravityScale(gravityScale * 2);
+        }
+
+        if (IsGrounded())
+        {
+            lastOnGround = coyoteTime;
+            isJumping = false;
+            jumpCut = false;
+            SetGravityScale(gravityScale);
+        }
+        else if (isJumping && rb.velocity.y <= 0)
+        {
+            isJumping= false;
+            canJumpCut= false;
+        }
+
     }
 
-    public void OnJump(InputAction.CallbackContext context)
-    {
-        if(context.performed) 
-        {
-            jumping = true;
+    #endregion
 
-            Debug.Log(jumping);
-        }
-        if(context.canceled) 
-        {
-            jumping= false;
+    #region Run
 
-            Debug.Log(jumping);
-        }
-    }
-
+    // Triggers when movement input starts
     private void OnMovement(InputAction.CallbackContext value)
     {
         direction = value.ReadValue<float>();
+
+        transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x) * direction, transform.localScale.y, transform.localScale.z);
     }
 
+    // Triggers when movement input stops
     private void OnMovementCanceled(InputAction.CallbackContext value)
     {
         direction = 0;
@@ -142,8 +192,36 @@ public class CharacterController : MonoBehaviour
         rb.AddForce(movement * Vector2.right, ForceMode2D.Force);
     }
 
+    #endregion
+
+    #region Jump
+
+    // Triggers when jump input changes state
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        lastPressedJump = 0;
+        lastOnGround = 0;
+
+        if (context.performed)
+        {
+            lastPressedJump = jumpTimeBuffer;
+
+        }
+        if (context.canceled)
+        {
+            if (canJumpCut)
+            {
+                jumpCut = true;
+            }
+        }
+    }
+
+    // Applies jump
     private void Jump()
     {
+        lastPressedJump = 0;
+        lastOnGround = 0;
+
         float force = jumpForce;
         if(rb.velocity.y < 0)
             force -= rb.velocity.y;
@@ -151,11 +229,17 @@ public class CharacterController : MonoBehaviour
         rb.AddForce(Vector2.up * force, ForceMode2D.Impulse);
     }
 
+    #endregion
+
+
+    // Updates Gizmos 
     private void OnDrawGizmos()
     {
         if(groundCheckGizmo)
         {
-
+            Debug.DrawRay(coll.bounds.center + new Vector3(coll.bounds.extents.x, 0), Vector2.down * (coll.bounds.extents.y + 0.01f), groundGizmo); ;
+            Debug.DrawRay(coll.bounds.center - new Vector3(coll.bounds.extents.x, 0), Vector2.down * (coll.bounds.extents.y + 0.01f), groundGizmo);
+            Debug.DrawRay(coll.bounds.center - new Vector3(coll.bounds.extents.x, coll.bounds.extents.y + 0.01f), Vector2.right * (coll.bounds.extents.x * 2), groundGizmo);
         }
     }
 
@@ -170,7 +254,4 @@ public class CharacterController : MonoBehaviour
 
         return result;
     }
-
-    
-
 }
