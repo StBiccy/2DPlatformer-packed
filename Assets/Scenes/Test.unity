@@ -265,8 +265,12 @@ MonoBehaviour:
   runDeccel: 5
   jumpHight: 6
   jumpTimeToApex: 0.5
-  coyoteTime: 0.5
-  jumpTimeBuffer: 0.5
+  coyoteTime: 0.2
+  jumpTimeBuffer: 0.2
+  dashPower: 25
+  dashCDTime: 0.05
+  dashTimeBuffer: 0.2
+  dashTime: 0.15
 --- !u!114 &360880149
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -353,6 +357,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 7401fddc-2a20-4bf3-aac4-4f1d7f86a0a3
     m_ActionName: Player/Jump[/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 360880148}
+        m_TargetAssemblyTypeName: CharacterController, Assembly-CSharp
+        m_MethodName: OnDash
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 75858166-a5ef-4ac8-ba4f-fc0ae47f9dfd
+    m_ActionName: Player/Dash[/Keyboard/ctrl]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -3032,7 +3052,7 @@ Transform:
   m_Children:
   - {fileID: 765905368}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2111386871
 GameObject:
@@ -3087,7 +3107,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 6.070424
+  orthographic size: 5.9912753
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -3110,11 +3130,11 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2111386871}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.98, z: -10}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -2.8, y: 1.057, z: -9.240633}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

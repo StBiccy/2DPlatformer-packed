@@ -49,6 +49,23 @@ public class CharacterController : MonoBehaviour
     private bool jumpCut;// check if the player has chosen to jump cut
     #endregion
 
+    #region Dash
+
+    [Header("Dash Values")]
+    [SerializeField] private float dashPower;
+    [SerializeField] private float dashCDTime;
+    [SerializeField, Range(0.1f, 1.0f)] private float dashTimeBuffer;
+    [SerializeField] private float dashTime;
+    private float lastFacedDirection = 1;
+    private float dashTimeCounter = 0.0f;
+    private float dashCD = 0.0f;
+    private float lastPressedDash = 0.0f;
+    private bool isDashing = false;
+    private bool dashed = false;
+    
+
+    #endregion
+
     #endregion
 
     #region Setups
@@ -109,6 +126,7 @@ public class CharacterController : MonoBehaviour
     // Updates at a fixed rate, use mainly for physics updating
     private void FixedUpdate()
     {
+        if(!isDashing)
         Movement();
     }
 
@@ -117,38 +135,68 @@ public class CharacterController : MonoBehaviour
     {
         lastOnGround -= Time.deltaTime;
         lastPressedJump -= Time.deltaTime;
+        lastPressedDash -= Time.deltaTime;
+        dashCD -= Time.deltaTime;
+        dashTimeCounter -= Time.deltaTime;
 
-        //Check if player can jump
-        if (lastPressedJump > 0 && lastOnGround > 0)
+
+        if (lastPressedDash > 0 && CanDash())
         {
-
-
-            isJumping = true;
-            canJumpCut = true;
+            isDashing = true;
+            canJumpCut = false;
             jumpCut = false;
-
-            Jump();
-        }
-        else if (jumpCut)
-        {
             isJumping = false;
 
-            SetGravityScale(gravityScale * 2);
+            
+            Dash();
+            SetGravityScale(0);
         }
 
-        if (IsGrounded())
+        if(!isDashing)
         {
-            lastOnGround = coyoteTime;
-            isJumping = false;
-            jumpCut = false;
+            //Check if player can jump
+            if (lastPressedJump > 0 && lastOnGround > 0)
+            {
+                isJumping = true;
+                canJumpCut = true;
+                jumpCut = false;
+                isDashing = false;
+
+                Jump();
+            }
+
+            else if (jumpCut)
+            {
+                isJumping = false;
+                isDashing = false;
+
+                SetGravityScale(gravityScale * 2);
+            }
+
+            if (IsGrounded())
+            {
+                lastOnGround = coyoteTime;
+                isJumping = false;
+                jumpCut = false;
+                isDashing = false;
+                dashed = false;
+
+                SetGravityScale(gravityScale);
+            }
+
+            else if (isJumping && rb.velocity.y <= 0)
+            {
+                isJumping = false;
+                canJumpCut = false;
+                isDashing = false;
+            }
+        }
+        else if(dashTimeCounter <= 0)
+        {
+            isDashing = false;
+            rb.velocity = Vector2.zero;
             SetGravityScale(gravityScale);
         }
-        else if (isJumping && rb.velocity.y <= 0)
-        {
-            isJumping= false;
-            canJumpCut= false;
-        }
-
     }
 
     #endregion
@@ -159,7 +207,7 @@ public class CharacterController : MonoBehaviour
     private void OnMovement(InputAction.CallbackContext value)
     {
         direction = value.ReadValue<float>();
-
+        lastFacedDirection = direction;
         transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x) * direction, transform.localScale.y, transform.localScale.z);
     }
 
@@ -216,6 +264,8 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+
+
     // Applies jump
     private void Jump()
     {
@@ -231,6 +281,44 @@ public class CharacterController : MonoBehaviour
 
     #endregion
 
+    public void OnDash(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        lastPressedDash = dashTimeBuffer;
+    }
+
+    private void Dash()
+    {
+
+        lastPressedDash = 0;
+        dashCD = dashCDTime;
+        dashTimeCounter = dashTime;
+        dashed = true;
+
+        rb.velocity = Vector2.zero;
+
+        if (direction != 0)
+            rb.AddForce((Vector2.right * direction) * dashPower, ForceMode2D.Impulse);
+        else
+            rb.AddForce((Vector2.right * lastFacedDirection) * dashPower, ForceMode2D.Impulse);
+    }
+
+    private bool CanDash()
+    {
+        if (lastOnGround >= 0)
+        {
+            if (dashCD <= 0)
+            {
+                return true;
+            }
+        }
+        else if (!dashed)
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     // Updates Gizmos 
     private void OnDrawGizmos()
