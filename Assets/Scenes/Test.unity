@@ -271,6 +271,7 @@ MonoBehaviour:
   dashCDTime: 0.05
   dashTimeBuffer: 0.2
   dashTime: 0.15
+  slowedDownTimeScale: 0.4
 --- !u!114 &360880149
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -373,6 +374,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 75858166-a5ef-4ac8-ba4f-fc0ae47f9dfd
     m_ActionName: Player/Dash[/Keyboard/ctrl]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 360880148}
+        m_TargetAssemblyTypeName: CharacterController, Assembly-CSharp
+        m_MethodName: OnTimeWarp
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: d5bc0f0b-e54d-47be-b2b4-4236aaf9c256
+    m_ActionName: Player/Time Warp[/Keyboard/shift]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
