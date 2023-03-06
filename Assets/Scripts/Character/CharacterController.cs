@@ -62,9 +62,11 @@ public class CharacterController : MonoBehaviour
     private float lastPressedDash = 0.0f;
     private bool isDashing = false;
     private bool dashed = false;
-    
 
     #endregion
+
+    [Header ("Time Warp Values")]
+    [SerializeField, Range(0f, 1f)] private float slowedDownTimeScale;
 
     #endregion
 
@@ -281,6 +283,7 @@ public class CharacterController : MonoBehaviour
 
     #endregion
 
+    #region Dash
     public void OnDash(InputAction.CallbackContext context)
     {
         if (context.performed)
@@ -331,6 +334,20 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    #endregion
+
+    public void OnTimeWarp(InputAction.CallbackContext context)
+    {
+        if(context.performed)
+        {
+            Time.timeScale = slowedDownTimeScale;
+            Time.fixedDeltaTime = Time.timeScale * 0.02f;
+        }
+        if(context.canceled)
+        {
+            Time.timeScale = 1;
+        }
+    }
     //Checks if the player is grounded
     private bool IsGrounded()
     {
