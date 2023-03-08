@@ -42,6 +42,6 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: New Layer
+  - name: Enemy
     uniqueID: 3820135613
     locked: 0

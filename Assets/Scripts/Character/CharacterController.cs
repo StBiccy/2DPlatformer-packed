@@ -351,7 +351,7 @@ public class CharacterController : MonoBehaviour
     //Checks if the player is grounded
     private bool IsGrounded()
     {
-        bool result = Physics2D.BoxCast(coll.bounds.center, coll.bounds.size , 0, Vector2.down, .01f, groundLayers);
+        bool result = Physics2D.BoxCast(coll.bounds.center, coll.bounds.size , 0, Vector2.down, .1f, groundLayers);
         if (result)
             groundGizmo = Color.green;
         else 
