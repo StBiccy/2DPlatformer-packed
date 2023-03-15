@@ -133,7 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 210040238}
   - component: {fileID: 210040237}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Player Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -220,7 +220,7 @@ GameObject:
   - component: {fileID: 360880148}
   - component: {fileID: 360880151}
   - component: {fileID: 360880152}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -235,7 +235,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 360880146}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.84, y: 0.025, z: 4.759367}
+  m_LocalPosition: {x: 7.06, y: 0.025, z: 4.759367}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -414,7 +414,7 @@ Rigidbody2D:
   m_Material: {fileID: 6200000, guid: 5e6f89301c6f0ed49bb19d22f113ace9, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!61 &360880152
 BoxCollider2D:
@@ -482,7 +482,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 656542537}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Gun Piviot
   m_TagString: Untagged
   m_Icon: {fileID: 4162164826716764455, guid: 0000000000000000d000000000000000, type: 0}
@@ -3206,7 +3206,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1107486363}
   - component: {fileID: 1107486364}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Square
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3290,7 +3290,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1251995188}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3322,7 +3322,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1453155226}
   - component: {fileID: 1453155227}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Square
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3410,7 +3410,7 @@ GameObject:
   - component: {fileID: 1504293961}
   - component: {fileID: 1504293957}
   - component: {fileID: 1504293960}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: BADI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3493,7 +3493,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f2191aa2daeae1949bbf5f0870c73d4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 507023695}
+  target: {fileID: 360880146}
   pivot: {fileID: 656542536}
   lookSpeed: 1
   bulletCoolDown: 1
@@ -3501,6 +3501,10 @@ MonoBehaviour:
   projectile: {fileID: 8532987693986450751, guid: 57c4e434d45e88949acd8b00bab73093,
     type: 3}
   moveSpeed: 3
+  lookDistance: 15
+  observeObjects:
+    serializedVersion: 2
+    m_Bits: 768
 --- !u!61 &1504293961
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3537,7 +3541,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1600547478}
   - component: {fileID: 1600547479}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Square (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
