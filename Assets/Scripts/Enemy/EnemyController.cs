@@ -45,6 +45,7 @@ public class EnemyController : MonoBehaviour
     void Update()
     {
         Vector2 direction = target.transform.position - this.transform.position;
+        bulletCountDown -= Time.deltaTime;
 
         if (isAiming)
         {
@@ -60,7 +61,6 @@ public class EnemyController : MonoBehaviour
         {
             patrol();
         }
-
         else if (moveTowardsPlayer)
         {
             if (lookingRight)
@@ -82,13 +82,13 @@ public class EnemyController : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if(!moveTowardsPlayer) { FlipSelf(); }
+        if (!moveTowardsPlayer) { FlipSelf(); }
         else { canNotMove = true; }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(moveTowardsPlayer) { canNotMove = false; }
+        if (moveTowardsPlayer) { canNotMove = false; }
     }
 
     private void patrol()
@@ -125,11 +125,10 @@ public class EnemyController : MonoBehaviour
     {
         Quaternion rotation = new Quaternion(0, 0, 0, 0);
 
-        bulletCountDown -= Time.deltaTime;
 
         // Checks if the player is now on the other side of the enemy and filps them if so
         if (target.transform.position.x < transform.position.x && lookingRight) { FlipSelf(); }
-        else if (target.transform.position.x > transform.position.x && !lookingRight) { FlipSelf();}
+        else if (target.transform.position.x > transform.position.x && !lookingRight) { FlipSelf(); }
 
 
         // rotates the gun in the direction of the player
@@ -148,7 +147,7 @@ public class EnemyController : MonoBehaviour
         }
 
         //fires the bullet
-        if (transform.rotation == rotation && bulletCountDown <= 0)
+        if (pivot.transform.rotation == rotation && bulletCountDown <= 0)
         {
 
             Vector3 targetForward = pivot.transform.rotation * Vector3.forward;
@@ -162,7 +161,8 @@ public class EnemyController : MonoBehaviour
                 bulletRef.GetComponent<Projectile>().direction = -1;
 
             bulletCountDown = bulletCoolDown;
-
+            isAiming = false;
+            moveTowardsPlayer = true;
         }
     }
 
@@ -173,16 +173,35 @@ public class EnemyController : MonoBehaviour
 
         RaycastHit2D hit = Physics2D.Raycast(this.transform.position, dir, lookDistance, observableLayers);
 
-        if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Character"))
+        if (hit)
         {
-            moveTowardsPlayer = true;
-            isPatroling = false;
-        }
+            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Character"))
+            {
+                if (isPatroling)
+                {
+                    moveTowardsPlayer = true;
+                    isPatroling = false;
+                }
+                else if (hit.distance <= (lookDistance / 4) * 3 && !isAiming)
+                {
+                    isAiming = true;
+                    moveTowardsPlayer = false;
+                    enemyRB.velocity = Vector2.zero;
+                }
+            }
+            else if (isAiming)
+            {
+                pivot.transform.rotation = Quaternion.Euler(0, 0, 0);
+                isAiming = false;
+                moveTowardsPlayer = true;
+            }
 
-        if (debugRay)
-        {
-            Debug.DrawRay(this.transform.position, dir.normalized * hit.distance, Color.green);
-            Debug.DrawRay(hit.point, dir.normalized * (lookDistance - hit.distance), Color.red);
+            if (debugRay)
+            {
+                Debug.DrawRay(this.transform.position, dir.normalized * hit.distance, Color.green);
+                Debug.DrawRay(hit.point, dir.normalized * (lookDistance - hit.distance), Color.red);
+            }
         }
+        else { Debug.DrawRay(this.transform.position, dir.normalized * lookDistance, Color.red); }
     }
 }
