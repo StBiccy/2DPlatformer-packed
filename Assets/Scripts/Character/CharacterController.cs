@@ -323,6 +323,8 @@ public class CharacterController : MonoBehaviour
         return false;
     }
 
+    #endregion
+
     // Updates Gizmos 
     private void OnDrawGizmos()
     {
@@ -334,7 +336,6 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    #endregion
 
     public void OnTimeWarp(InputAction.CallbackContext context)
     {
