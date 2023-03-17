@@ -8,10 +8,13 @@ public class CharacterController : MonoBehaviour
 {
     #region variables 
     private CharacterInputs input; // Input class reference
+    private InputActionMap inputActionMap;
 
     private Rigidbody2D rb; // Player's rigidbody refrence
 
-    #region Ground variables
+    private bool dead = false;
+
+    #region Ground Variables
 
     [Header("Ground Check Values")]
     [SerializeField] private BoxCollider2D coll; // Player's collison refrence
@@ -21,7 +24,7 @@ public class CharacterController : MonoBehaviour
     private Color groundGizmo = Color.red; //Colour value of the ground check gizmo
     #endregion
 
-    #region Movement variables
+    #region Movement Variables
 
     [Header("Movement values")]
     [SerializeField, Range(0.0f, 20.0f)] float runAccel; // Acceleration rate of the player
@@ -33,7 +36,7 @@ public class CharacterController : MonoBehaviour
     private float direction; // The directoin the player is moving in
     #endregion
 
-    #region Jump variables
+    #region Jump Variables
 
     [Header("Jump values")]
     [SerializeField, Range(0.0f, 20.0f)] private float jumpHight; //The hight of the player's jump
@@ -49,7 +52,7 @@ public class CharacterController : MonoBehaviour
     private bool jumpCut;// check if the player has chosen to jump cut
     #endregion
 
-    #region Dash
+    #region Dash Variables
 
     [Header("Dash Values")]
     [SerializeField] private float dashPower;
@@ -65,11 +68,13 @@ public class CharacterController : MonoBehaviour
 
     #endregion
 
+    #region Time Warp Variables
     [Header ("Time Warp Values")]
     [SerializeField, Range(0f, 1f)] private float slowedDownTimeScale;
 
     #endregion
 
+    #endregion
     #region Setups
 
     //runst first thing on scritp
@@ -128,76 +133,82 @@ public class CharacterController : MonoBehaviour
     // Updates at a fixed rate, use mainly for physics updating
     private void FixedUpdate()
     {
-        if(!isDashing)
-        Movement();
+        if (!dead)
+        {
+            if (!isDashing)
+                Movement();
+        }
     }
 
     // Updates every frame, use mainly for frame specfic actions
     private void Update()
     {
-        lastOnGround -= Time.deltaTime;
-        lastPressedJump -= Time.deltaTime;
-        lastPressedDash -= Time.deltaTime;
-        dashCD -= Time.deltaTime;
-        dashTimeCounter -= Time.deltaTime;
-
-
-        if (lastPressedDash > 0 && CanDash())
+        if (!dead)
         {
-            isDashing = true;
-            canJumpCut = false;
-            jumpCut = false;
-            isJumping = false;
+            lastOnGround -= Time.deltaTime;
+            lastPressedJump -= Time.deltaTime;
+            lastPressedDash -= Time.deltaTime;
+            dashCD -= Time.deltaTime;
+            dashTimeCounter -= Time.deltaTime;
 
-            
-            Dash();
-            SetGravityScale(0);
-        }
 
-        if(!isDashing)
-        {
-            //Check if player can jump
-            if (lastPressedJump > 0 && lastOnGround > 0)
+            if (lastPressedDash > 0 && CanDash())
             {
-                isJumping = true;
-                canJumpCut = true;
+                isDashing = true;
+                canJumpCut = false;
                 jumpCut = false;
-                isDashing = false;
+                isJumping = false;
 
-                Jump();
+
+                Dash();
+                SetGravityScale(0);
             }
 
-            else if (jumpCut)
+            if (!isDashing)
             {
-                isJumping = false;
-                isDashing = false;
+                //Check if player can jump
+                if (lastPressedJump > 0 && lastOnGround > 0)
+                {
+                    isJumping = true;
+                    canJumpCut = true;
+                    jumpCut = false;
+                    isDashing = false;
 
-                SetGravityScale(gravityScale * 2);
+                    Jump();
+                }
+
+                else if (jumpCut)
+                {
+                    isJumping = false;
+                    isDashing = false;
+
+                    SetGravityScale(gravityScale * 2);
+                }
+
+                if (IsGrounded())
+                {
+                    lastOnGround = coyoteTime;
+                    isJumping = false;
+                    jumpCut = false;
+                    isDashing = false;
+                    dashed = false;
+
+                    SetGravityScale(gravityScale);
+                }
+
+                else if (isJumping && rb.velocity.y <= 0)
+                {
+                    isJumping = false;
+                    canJumpCut = false;
+                    isDashing = false;
+                }
             }
-
-            if (IsGrounded())
+            else if (dashTimeCounter <= 0)
             {
-                lastOnGround = coyoteTime;
-                isJumping = false;
-                jumpCut = false;
                 isDashing = false;
-                dashed = false;
-
+                rb.velocity = Vector2.zero;
                 SetGravityScale(gravityScale);
             }
-
-            else if (isJumping && rb.velocity.y <= 0)
-            {
-                isJumping = false;
-                canJumpCut = false;
-                isDashing = false;
-            }
-        }
-        else if(dashTimeCounter <= 0)
-        {
-            isDashing = false;
-            rb.velocity = Vector2.zero;
-            SetGravityScale(gravityScale);
         }
     }
 
@@ -208,15 +219,21 @@ public class CharacterController : MonoBehaviour
     // Triggers when movement input starts
     private void OnMovement(InputAction.CallbackContext value)
     {
-        direction = value.ReadValue<float>();
-        lastFacedDirection = direction;
-        transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x) * direction, transform.localScale.y, transform.localScale.z);
+        if (!dead)
+        {
+            direction = value.ReadValue<float>();
+            lastFacedDirection = direction;
+            transform.localScale = new Vector3(Mathf.Abs(transform.localScale.x) * direction, transform.localScale.y, transform.localScale.z);
+        }
     }
 
     // Triggers when movement input stops
     private void OnMovementCanceled(InputAction.CallbackContext value)
     {
-        direction = 0;
+        if (!dead)
+        {
+            direction = 0;
+        }
     }
 
     //Preforms player movement
@@ -249,19 +266,22 @@ public class CharacterController : MonoBehaviour
     // Triggers when jump input changes state
     public void OnJump(InputAction.CallbackContext context)
     {
-        lastPressedJump = 0;
-        lastOnGround = 0;
-
-        if (context.performed)
+        if (!dead)
         {
-            lastPressedJump = jumpTimeBuffer;
+            lastPressedJump = 0;
+            lastOnGround = 0;
 
-        }
-        if (context.canceled)
-        {
-            if (canJumpCut)
+            if (context.performed)
             {
-                jumpCut = true;
+                lastPressedJump = jumpTimeBuffer;
+
+            }
+            if (context.canceled)
+            {
+                if (canJumpCut)
+                {
+                    jumpCut = true;
+                }
             }
         }
     }
@@ -286,8 +306,11 @@ public class CharacterController : MonoBehaviour
     #region Dash
     public void OnDash(InputAction.CallbackContext context)
     {
-        if (context.performed)
-        lastPressedDash = dashTimeBuffer;
+        if (!dead)
+        {
+            if (context.performed)
+                lastPressedDash = dashTimeBuffer;
+        }
     }
 
     private void Dash()
@@ -336,17 +359,19 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-
     public void OnTimeWarp(InputAction.CallbackContext context)
     {
-        if(context.performed)
+        if (!dead)
         {
-            Time.timeScale = slowedDownTimeScale;
-            Time.fixedDeltaTime = Time.timeScale * 0.02f;
-        }
-        if(context.canceled)
-        {
-            Time.timeScale = 1;
+            if (context.performed)
+            {
+                Time.timeScale = slowedDownTimeScale;
+                Time.fixedDeltaTime = Time.timeScale * 0.02f;
+            }
+            if (context.canceled)
+            {
+                Time.timeScale = 1;
+            }
         }
     }
     //Checks if the player is grounded
@@ -359,5 +384,11 @@ public class CharacterController : MonoBehaviour
             groundGizmo = Color.red;
 
         return result;
+    }
+
+    public void Hit()
+    {
+        dead = true;
+        Time.timeScale = 0;
     }
 }
