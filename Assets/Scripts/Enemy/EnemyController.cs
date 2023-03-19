@@ -33,6 +33,8 @@ public class EnemyController : MonoBehaviour
     private bool isPatroling = true;
     private bool lookingRight = true;
 
+    public DoorScript door;
+
     private void Awake()
     {
         enemyRB = GetComponent<Rigidbody2D>();
@@ -118,12 +120,16 @@ public class EnemyController : MonoBehaviour
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("Level"))
         {
+
             if (moveTowardsPlayer) { canNotMove = false; }
         }
         else if (collision.tag == "Player Attack Box")
         {
             Destroy(gameObject);
         }
+
+        if (collision.tag == "Door") { FlipSelf(); }
+
     }
 
     private void patrol()
@@ -188,6 +194,10 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        door.Check();
+    }
     private void playerSearch(Vector2 dir)
     {
         Vector2 fromPosition = this.transform.position;

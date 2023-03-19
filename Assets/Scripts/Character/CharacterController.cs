@@ -441,6 +441,7 @@ public class CharacterController : MonoBehaviour
         if(context.performed)
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            Time.timeScale = 1;
         }
     }
 }
