@@ -1,14 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class CharacterController : MonoBehaviour
 {
     #region variables 
     private CharacterInputs input; // Input class reference
-    private InputActionMap inputActionMap;
+
+    [SerializeField] private GameObject AttackBox;
+    [SerializeField] private float attackCD;
+    [SerializeField] private float attackDuration;
+    private float attackTimer;
+    private float attackCDTimer = 0;
+    private bool attack = false;
+    private bool attacking = false;
+
 
     private Rigidbody2D rb; // Player's rigidbody refrence
 
@@ -65,6 +75,7 @@ public class CharacterController : MonoBehaviour
     private float lastPressedDash = 0.0f;
     private bool isDashing = false;
     private bool dashed = false;
+    private bool dashImmunity = false;
 
     #endregion
 
@@ -145,12 +156,15 @@ public class CharacterController : MonoBehaviour
     {
         if (!dead)
         {
+            #region Timers
             lastOnGround -= Time.deltaTime;
             lastPressedJump -= Time.deltaTime;
             lastPressedDash -= Time.deltaTime;
             dashCD -= Time.deltaTime;
             dashTimeCounter -= Time.deltaTime;
-
+            attackCDTimer -= Time.deltaTime;
+            attackTimer -= Time.deltaTime;
+            #endregion
 
             if (lastPressedDash > 0 && CanDash())
             {
@@ -158,7 +172,10 @@ public class CharacterController : MonoBehaviour
                 canJumpCut = false;
                 jumpCut = false;
                 isJumping = false;
+                dashImmunity = true;
+                attackCDTimer = 0;
 
+                gameObject.layer = LayerMask.NameToLayer("Dash Immune");
 
                 Dash();
                 SetGravityScale(0);
@@ -202,9 +219,26 @@ public class CharacterController : MonoBehaviour
                     canJumpCut = false;
                     isDashing = false;
                 }
+
+                if (attack)
+                {
+                    AttackBox.SetActive(true);
+
+                    attackCDTimer = attackCD;
+                    attack = false;
+                    attacking = true;
+                    attackTimer = attackDuration;
+                }
+                else if (attacking && attackTimer <= 0)
+                {
+                    attacking = false;
+                    AttackBox.SetActive(false);
+                }
             }
             else if (dashTimeCounter <= 0)
             {
+                gameObject.layer = LayerMask.NameToLayer("Character");
+                dashImmunity= false;
                 isDashing = false;
                 rb.velocity = Vector2.zero;
                 SetGravityScale(gravityScale);
@@ -348,6 +382,13 @@ public class CharacterController : MonoBehaviour
 
     #endregion
 
+
+    public void Attack(InputAction.CallbackContext context)
+    {
+        if(context.performed && attackCDTimer <= 0)
+        attack = true;
+    }
+
     // Updates Gizmos 
     private void OnDrawGizmos()
     {
@@ -388,7 +429,18 @@ public class CharacterController : MonoBehaviour
 
     public void Hit()
     {
-        dead = true;
-        Time.timeScale = 0;
+        if (!dashImmunity)
+        {
+            dead = true;
+            Time.timeScale = 0;
+        }
+    }
+
+    public void ResetLevel(InputAction.CallbackContext context)
+    {
+        if(context.performed)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
 }

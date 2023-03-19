@@ -13,10 +13,13 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private GameObject pivot;
     [SerializeField] private float lookSpeed = 50;
 
+    [SerializeField] private float fireWait;
     [SerializeField] private float bulletCoolDown;
     [SerializeField] private GameObject firePoint;
     [SerializeField] private GameObject projectile;
+    private float fireWaitTimer;
     private float bulletCountDown;
+    private bool fire = false;
 
     [SerializeField] private float patrolSpeed = 1f;
     [SerializeField] private float chaseSpeed = 1f;
@@ -44,51 +47,83 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        fireWaitTimer += Time.deltaTime;
+
         Vector2 direction = target.transform.position - this.transform.position;
         bulletCountDown -= Time.deltaTime;
 
-        if (isAiming)
+        if (!fire)
         {
-            Aim(direction);
-        }
+            if (isAiming)
+            {
+                Aim(direction);
+            }
 
-        playerSearch(direction);
+            playerSearch(direction);
+        }
+        else if (fireWaitTimer >= fireWait)
+        {
+            var bulletRef = Instantiate(projectile, firePoint.transform.position, pivot.transform.rotation);
+
+            if (lookingRight)
+                bulletRef.GetComponent<Projectile>().direction = 1;
+            else
+                bulletRef.GetComponent<Projectile>().direction = -1;
+
+            bulletCountDown = bulletCoolDown;
+            isAiming = false;
+            moveTowardsPlayer = true;
+            fire = false;
+        }
     }
 
     private void FixedUpdate()
     {
-        if (isPatroling)
+        if (!fire)
         {
-            patrol();
-        }
-        else if (moveTowardsPlayer)
-        {
-            if (lookingRight)
+            if (isPatroling)
             {
-                if (target.transform.position.x < this.transform.position.x) { FlipSelf(); }
-
-                if (!canNotMove) { enemyRB.velocity = new Vector2(chaseSpeed, 0); }
-                else { enemyRB.velocity = Vector2.zero; }
+                patrol();
             }
-            else
+            else if (moveTowardsPlayer)
             {
-                if (target.transform.position.x > this.transform.position.x) { FlipSelf(); }
+                if (lookingRight)
+                {
+                    if (target.transform.position.x < this.transform.position.x) { FlipSelf(); }
 
-                if (!canNotMove) { enemyRB.velocity = new Vector2(-chaseSpeed, 0); }
-                else { enemyRB.velocity = Vector2.zero; }
+                    if (!canNotMove) { enemyRB.velocity = new Vector2(chaseSpeed, 0); }
+                    else { enemyRB.velocity = Vector2.zero; }
+                }
+                else
+                {
+                    if (target.transform.position.x > this.transform.position.x) { FlipSelf(); }
+
+                    if (!canNotMove) { enemyRB.velocity = new Vector2(-chaseSpeed, 0); }
+                    else { enemyRB.velocity = Vector2.zero; }
+                }
             }
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (!moveTowardsPlayer) { FlipSelf(); }
-        else { canNotMove = true; }
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Level"))
+        {
+            if (!moveTowardsPlayer) { FlipSelf(); }
+            else { canNotMove = true; }
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (moveTowardsPlayer) { canNotMove = false; }
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Level"))
+        {
+            if (moveTowardsPlayer) { canNotMove = false; }
+        }
+        else if (collision.tag == "Player Attack Box")
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void patrol()
@@ -146,23 +181,10 @@ public class EnemyController : MonoBehaviour
             pivot.transform.rotation = Quaternion.RotateTowards(pivot.transform.rotation, rotation, Time.deltaTime * lookSpeed);
         }
 
-        //fires the bullet
         if (pivot.transform.rotation == rotation && bulletCountDown <= 0)
         {
-
-            Vector3 targetForward = pivot.transform.rotation * Vector3.forward;
-            Vector3 targetUp = pivot.transform.rotation * Vector3.up;
-
-            var bulletRef = Instantiate(projectile, firePoint.transform.position, pivot.transform.rotation);
-
-            if (lookingRight)
-                bulletRef.GetComponent<Projectile>().direction = 1;
-            else
-                bulletRef.GetComponent<Projectile>().direction = -1;
-
-            bulletCountDown = bulletCoolDown;
-            isAiming = false;
-            moveTowardsPlayer = true;
+            fireWaitTimer = 0;
+            fire = true;
         }
     }
 

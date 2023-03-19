@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8532987693986450750}
   - component: {fileID: 8532987693986450748}
   - component: {fileID: 4629918301929293720}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -59,7 +59,7 @@ Rigidbody2D:
   m_GameObject: {fileID: 8532987693986450751}
   m_BodyType: 1
   m_Simulated: 1
-  m_UseFullKinematicContacts: 0
+  m_UseFullKinematicContacts: 1
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
@@ -96,7 +96,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8532987694127856826}
   - component: {fileID: 8532987694127856824}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Bullet Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}

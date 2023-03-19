@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Moving Platform
+  - Player Attack Box
   layers:
   - Default
   - TransparentFX
@@ -13,12 +14,12 @@ TagManager:
   - Water
   - UI
   - Bullet
-  - Ignore Enemies Bullet
+  - Dash Immune
   - Level
   - Character
   - Enemy
   - Recharge
-  - 
+  - Chracter Hit Box
   - 
   - 
   - 

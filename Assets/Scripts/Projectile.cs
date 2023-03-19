@@ -9,6 +9,8 @@ public class Projectile : MonoBehaviour
 
     [HideInInspector] public int direction = 1;
 
+    bool hitEnemy = false;
+
 
     private float lifesapn = 5;
 
@@ -33,20 +35,29 @@ public class Projectile : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag == "Player Attack Box")
+        {
+            projectileRB.velocity = -projectileRB.velocity;
+            hitEnemy= true;
+        }
+    }
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.gameObject.layer == LayerMask.NameToLayer("Level")) 
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Level"))
         {
             Destroy(gameObject);
         }
-        else if(collision.gameObject.layer == LayerMask.NameToLayer("Character"))
+        else if (collision.gameObject.layer == LayerMask.NameToLayer("Enemy") && hitEnemy)
+        {
+            Destroy(collision.gameObject);
+            Destroy(gameObject);
+        }
+        else if (collision.gameObject.layer == LayerMask.NameToLayer("Character"))
         {
             collision.gameObject.GetComponent<CharacterController>().Hit();
             Destroy(gameObject);
-        }
-        else if (collision.gameObject.layer == LayerMask.NameToLayer("Enemey"))
-        {
-
         }
     }
 }
