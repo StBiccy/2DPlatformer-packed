@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class KillVolume : MonoBehaviour
 {
-    public Transform respawnPoint;
+
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Character"))
         {
-            collision.transform.position = respawnPoint.position;
+            collision.gameObject.GetComponent<CharacterController>().Hit(gameObject);
         }
     }
 }

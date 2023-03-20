@@ -7,6 +7,10 @@ public class DoorScript : MonoBehaviour
     [SerializeField] private GameObject[] enemies;
     [SerializeField] private GameObject cam;
     [SerializeField] private GameObject camNewPos;
+    [SerializeField] private bool finalDoor = false;
+    [SerializeField] private GameObject winScreen;
+
+
     private int count;
 
     private void Awake()
@@ -26,10 +30,17 @@ public class DoorScript : MonoBehaviour
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("Character"))
         {
+            if(finalDoor)
+            {
+                winScreen.SetActive(true);
+                Time.timeScale = 0.0f;
+                return;
+            }
             transform.position -= new Vector3(0, 1.9f, 0);
             cam.transform.position = camNewPos.transform.position;
         }
     }
+
     // Update is called once per frame
     public void Check()
     {

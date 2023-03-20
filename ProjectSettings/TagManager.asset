@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Moving Platform
   - Player Attack Box
+  - Enemy
+  - Door
   layers:
   - Default
   - TransparentFX
@@ -20,8 +22,8 @@ TagManager:
   - Enemy
   - Recharge
   - Chracter Hit Box
-  - 
-  - 
+  - Door
+  - Kill Volume
   - 
   - 
   - 

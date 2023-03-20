@@ -56,7 +56,7 @@ public class Projectile : MonoBehaviour
         }
         else if (collision.gameObject.layer == LayerMask.NameToLayer("Character"))
         {
-            collision.gameObject.GetComponent<CharacterController>().Hit();
+            collision.gameObject.GetComponent<CharacterController>().Hit(gameObject);
             Destroy(gameObject);
         }
     }

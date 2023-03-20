@@ -10,6 +10,7 @@ public class CharacterController : MonoBehaviour
 {
     #region variables 
     private CharacterInputs input; // Input class reference
+    [SerializeField] GameObject deathScreen;
 
     [SerializeField] private GameObject AttackBox;
     [SerializeField] private float attackCD;
@@ -86,6 +87,7 @@ public class CharacterController : MonoBehaviour
     #endregion
 
     #endregion
+
     #region Setups
 
     //runst first thing on scritp
@@ -427,12 +429,13 @@ public class CharacterController : MonoBehaviour
         return result;
     }
 
-    public void Hit()
+    public void Hit(GameObject hitObject)
     {
-        if (!dashImmunity)
+        if (!dashImmunity || hitObject.layer == LayerMask.NameToLayer("Kill Volume"))
         {
             dead = true;
             Time.timeScale = 0;
+            deathScreen.SetActive(true);
         }
     }
 

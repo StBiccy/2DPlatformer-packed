@@ -321,7 +321,7 @@ Transform:
   - {fileID: 5319327688539379369}
   - {fileID: 5319327690068261755}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!70 &5319327688901608568
 CapsuleCollider2D:
@@ -401,6 +401,7 @@ MonoBehaviour:
   target: {fileID: 0}
   pivot: {fileID: 5319327690068261754}
   lookSpeed: 40
+  fireWait: 0
   bulletCoolDown: 1
   firePoint: {fileID: 5319327688682839553}
   projectile: {fileID: 8532987693986450751, guid: 57c4e434d45e88949acd8b00bab73093,
@@ -410,8 +411,9 @@ MonoBehaviour:
   lookDistance: 15
   observableLayers:
     serializedVersion: 2
-    m_Bits: 768
+    m_Bits: 8960
   debugRay: 1
+  door: {fileID: 0}
 --- !u!1 &5319327690068261754
 GameObject:
   m_ObjectHideFlags: 0
@@ -435,7 +437,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5319327690068261754}
-  m_LocalRotation: {x: -0, y: 0, z: 0.36988404, w: 0.9290779}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
