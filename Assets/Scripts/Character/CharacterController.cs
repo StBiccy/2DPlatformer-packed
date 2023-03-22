@@ -12,6 +12,8 @@ public class CharacterController : MonoBehaviour
     private CharacterInputs input; // Input class reference
     [SerializeField] GameObject deathScreen;
 
+    [SerializeField] Ghost ghost;
+
     [SerializeField] private GameObject AttackBox;
     [SerializeField] private float attackCD;
     [SerializeField] private float attackDuration;
@@ -410,10 +412,12 @@ public class CharacterController : MonoBehaviour
             {
                 Time.timeScale = slowedDownTimeScale;
                 Time.fixedDeltaTime = Time.timeScale * 0.02f;
+                ghost.makeGhost = true;
             }
             if (context.canceled)
             {
                 Time.timeScale = 1;
+                ghost.makeGhost = false;
             }
         }
     }
