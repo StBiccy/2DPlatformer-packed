@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -101,7 +100,7 @@ public class CharacterController : MonoBehaviour
     }
 
     // Updates when inspector changes
-    private void OnValidate()
+    private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
 
